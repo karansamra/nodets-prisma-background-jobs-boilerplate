@@ -1,0 +1,501 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  uuid      String   @unique @default(uuid())
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(200)
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User[]
+
+  @@index([id])
+}
+
+model End_User_Types {
+  uuid      String   @unique @default(uuid())
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(200)
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User[]
+
+  @@index([id])
+}
+
+model User {
+  id                      Int                      @id @default(autoincrement())
+  uuid                    String                   @unique @default(uuid())
+  endUserType             Int                      @default(1) @db.Int() //1-athele 2- Parents
+  notificationId          Int?                     @db.Int
+  userDetailsId           Int?                     @unique @db.Int()
+  userAdditionalDetailsId Int?                     @unique @db.Int()
+  email                   String?                  @unique @db.VarChar(200)
+  firstName               String?                  @db.VarChar(200)
+  lastName                String?                  @db.VarChar(200)
+  countryCode             String?                  @db.VarChar(11)
+  phoneNumber             String?                  @unique @db.VarChar(50)
+  password                String                   @db.VarChar(500)
+  dob                     String?                  @db.VarChar(200)
+  verified                Boolean                  @default(false)
+  status                  Int                      @default(1) @db.TinyInt() //1-active 2- not active
+  isDeleted               Int                      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  endUser                 End_User_Types           @relation(fields: [endUserType], references: [id])
+  userDetails             User_Details?            @relation(fields: [userDetailsId], references: [id])
+  eventIntrestedUsers     Event_Interested_Users[]
+  userEventResult         User_Event_Result[]
+  role                    Role[]
+  userAdditionalDetails   User_Additional_Details? @relation(fields: [userAdditionalDetailsId], references: [id])
+  Notification            Notification?            @relation(fields: [notificationId], references: [id])
+  subscriptions           subscriptions[]
+
+  @@index([id, email, phoneNumber, userDetailsId, userAdditionalDetailsId])
+}
+
+model User_Details {
+  id                    Int      @id @default(autoincrement())
+  uuid                  String   @unique @default(uuid())
+  gender                String?  @db.VarChar(200)
+  class                 String?  @db.VarChar(200)
+  highSchool            String?  @db.VarChar(200)
+  profilePic            String?  @db.VarChar(500)
+  profilePicDisplayName String?  @db.VarChar(500)
+  lacrosseClub          String?  @db.VarChar(200) // 
+  stateOfResident       String?  @db.VarChar(200)
+  subscriptionId        Int?     @db.Int
+  planId                Int?     @db.Int //uuid of plan
+  stripeCustomerId      String?  @unique @db.VarChar(200)
+  stripeSubscriptionId  String?  @unique @db.VarChar(200)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User?
+  subscriptionPlan      Plan?    @relation(fields: [planId], references: [id])
+
+  @@index([id])
+}
+
+model User_Additional_Details {
+  id                                 Int       @id @default(autoincrement())
+  uuid                               String    @unique @default(uuid())
+  height                             String    @db.VarChar(50)
+  weight                             String    @db.VarChar(50)
+  dominantHand                       String?   @db.VarChar(50)
+  verticalJump                       String?   @db.VarChar(50)
+  shotSpeed                          String?   @db.VarChar(50)
+  fortyYardDash                      String?   @db.VarChar(50)
+  fiveTenFive                        String?   @db.VarChar(50)
+  playerPosition                     String?   @db.VarChar(50)
+  teamMember                         Int?      @db.Int()
+  primaryClubPosition                String?   @db.VarChar(50)
+  NTDPTeamMember                     Int?      @db.TinyInt()
+  isAmericanResident                 Int?      @db.TinyInt()
+  NTDPCombineInvite                  Int?      @db.TinyInt()
+  highSchoolUSAAllAmerican           Int?      @db.TinyInt()
+  womenNationalTournamentSchoolgirls Int?      @db.TinyInt()
+  underArmourOneFifty                Int?      @db.TinyInt()
+  createdAt                          DateTime  @default(now())
+  updatedAt                          DateTime  @updatedAt
+  user                               User?
+  college                            college[]
+
+  @@index([id])
+}
+
+model college {
+  id                      Int                      @id @default(autoincrement())
+  uuid                    String                   @unique @default(uuid())
+  userAdditionalDetailsId Int?
+  name                    String?                  @db.VarChar(200)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  UserAdditionalDetails   User_Additional_Details? @relation(fields: [userAdditionalDetailsId], references: [id])
+
+  @@index([id])
+}
+
+model Events {
+  id                     Int                      @id @default(autoincrement())
+  uuid                   String                   @unique @default(uuid())
+  name                   String                   @db.VarChar(200)
+  eventLocation          String                   @db.Text()
+  eventLocationLatitude  String?                  @db.VarChar(500)
+  eventLocationLongitude String?                  @db.VarChar(500)
+  eventDateTime          DateTime                 @db.DateTime(0)
+  eventImageUrl          String?                  @db.VarChar(200)
+  eventImageDisplayName  String?                  @db.VarChar(200)
+  membersCount           Int                      @default(0) @db.Int()
+  status                 Int                      @default(1) @db.TinyInt() //1-active 2- expired
+  isDeleted              Int                      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  eventIntrestedUsers    Event_Interested_Users[]
+  userEventResult        User_Event_Result[]
+  Payment                Payment[]
+
+  @@index([id])
+}
+
+model Event_Packages {
+  id                   Int                      @id @default(autoincrement())
+  uuid                 String                   @unique @default(uuid())
+  name                 String                   @db.VarChar(200)
+  eventPrice           Int                      @db.Int()
+  eventDescription     String?                  @db.Text
+  packageType          Int                      @db.Int
+  status               Int                      @default(1) @db.TinyInt() //1-active 2- expired
+  isDeleted            Int                      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  eventInterestedUsers Event_Interested_Users[]
+  userEventResult      User_Event_Result[]
+  Payment              Payment[]
+
+  @@index([id])
+}
+
+model Event_Interested_Users {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @unique @default(uuid())
+  userId          Int?            @db.Int()
+  eventsId        Int?            @db.Int()
+  eventPackagesId Int?            @db.Int()
+  email           String?         @db.VarChar(200)
+  firstName       String?         @db.VarChar(200)
+  lastName        String?         @db.VarChar(200)
+  isGuest         Int             @default(1) @db.TinyInt() //1-No 2- Yes
+  highSchool      String?         @db.VarChar(200)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  User            User?           @relation(fields: [userId], references: [id])
+  Events          Events?         @relation(fields: [eventsId], references: [id])
+  EventPackages   Event_Packages? @relation(fields: [eventPackagesId], references: [id])
+
+  @@index([id, email, eventsId, firstName, lastName])
+}
+
+model User_Event_Result {
+  id                      Int             @id @default(autoincrement())
+  uuid                    String          @unique @default(uuid())
+  eventsId                Int?            @db.Int
+  userId                  Int?            @db.Int
+  eventPackagesId         Int?            @db.Int
+  shotSpeed               String?         @db.VarChar(50)
+  accuracy                String?         @db.VarChar(50)
+  fortyYardReactionTime   String?         @db.VarChar(50)
+  zeroToTenYard           String?         @db.VarChar(50)
+  tenToTwentyYard         String?         @db.VarChar(50)
+  twentyToFortyYard       String?         @db.VarChar(50)
+  fortyPlusYard           String?         @db.VarChar(50)
+  verticalJump            String?         @db.VarChar(50)
+  verticalJumpContactTime String?         @db.VarChar(50)
+  verticalJumpFlightTime  String?         @db.VarChar(50)
+  fiveTenFiveReactionTime String?         @db.VarChar(50)
+  acceleration            String?         @db.VarChar(50)
+  deceleration            String?         @db.VarChar(50)
+  lateralAgility          String?         @db.VarChar(50)
+  quickness               String?         @db.VarChar(50)
+  eventVideo              String?         @db.VarChar(500)
+  eventVideoName          String?         @db.VarChar(500)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  events                  Events?         @relation(fields: [eventsId], references: [id])
+  user                    User?           @relation(fields: [userId], references: [id])
+  eventPackages           Event_Packages? @relation(fields: [eventPackagesId], references: [id])
+
+  @@index([id])
+}
+
+model Plan {
+  id              Int             @id @default(autoincrement())
+  uuid            String          @unique @default(uuid())
+  name            String          @db.VarChar(200)
+  recurringType   Int             @db.Int() //1-monthly,2-yearly
+  tierType        Int             @db.Int() //1-free,2-basic ,3-premium
+  price           Int             @db.Int()
+  currency        String          @db.VarChar(200)
+  stripeProductId String?         @db.VarChar(100)
+  stripePriceId   String?         @db.VarChar(200)
+  planDetails     String?         @db.Text()
+  priceType       Int             @default(1) @db.Int() //1-recurring,2-oneTime
+  status          Int             @default(1) @db.TinyInt() //1-active 2- not active
+  isDeleted       Int             @default(0) @db.TinyInt() //0-not deleted 1- deleted
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  User_Details    User_Details[]
+  subscriptions   subscriptions[]
+  transactions    transactions[]
+
+  @@index([id, tierType, recurringType])
+}
+
+model Payment {
+  uuid           String          @unique @default(uuid())
+  id             Int             @id @default(autoincrement())
+  eventsId       Int?            @db.Int
+  eventPackageId Int?            @db.Int
+  userId         Int?            @db.Int()
+  email          String?         @db.VarChar(200)
+  firstName      String?         @db.VarChar(200)
+  lastName       String?         @db.VarChar(200)
+  highSchool     String?         @db.VarChar(200)
+  amount         Float           @db.Double()
+  isGuest        Int             @default(1) @db.TinyInt() //1-No 2- Yes
+  events         Events?         @relation(fields: [eventsId], references: [id])
+  eventPackages  Event_Packages? @relation(fields: [eventPackageId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([id, userId, eventsId, eventPackageId])
+}
+
+model Tokens {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @db.Int()
+  refreshToken String   @db.VarChar(500)
+  deviceId     String   @db.VarChar(200)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @db.Int()
+  otp       String   @db.VarChar(200)
+  otpType   Int      @db.Int()
+  expiredAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  otpTypes  Otp_Type @relation(fields: [otpType], references: [id])
+
+  @@index([userId, otpType])
+}
+
+model Otp_Type {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  otp       Otp[]
+}
+
+model Module {
+  uuid      String   @unique @default(uuid())
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  question  String   @db.Text
+  answer    String   @db.Text
+  type      Int      @default(1) //1 for faq 2 for privacy policy 3 for term and conditions
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  isDeleted Int      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact_Us {
+  id            Int      @id @default(autoincrement())
+  uuid          String   @unique @default(uuid())
+  name          String   @db.VarChar(200)
+  email         String   @db.Text
+  subject       String   @db.Text
+  comment       String   @db.Text
+  adminResponse String?  @db.Text
+  status        Int      @default(1) @db.TinyInt() //1-unresolved 2- resolved
+  isDeleted     Int      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model News_Catogory {
+  id        Int      @id @default(autoincrement()) @db.Int()
+  uuid      String   @unique @default(uuid())
+  name      String   @db.VarChar(200)
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  isDeleted Int      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  news      News[]
+}
+
+model News {
+  id               Int           @id @default(autoincrement()) @db.Int()
+  uuid             String        @unique @default(uuid())
+  newsCategoryId   Int           @db.Int()
+  title            String        @db.VarChar(200)
+  description      String        @db.Text
+  content          String        @db.Text
+  imageUrl         String        @db.VarChar(200)
+  imageDisplayName String        @db.VarChar(200)
+  status           Int           @default(1) @db.TinyInt() //1-unresolved 2- resolved
+  isDeleted        Int           @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  newsCategory     News_Catogory @relation(fields: [newsCategoryId], references: [id])
+
+  @@index([newsCategoryId])
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique @default(uuid())
+  userId      Int      @db.Int()
+  description String   @db.Text
+  isRead      Int      @default(2) @db.TinyInt()
+  type        Int      @default(1) @db.Int()
+  isDeleted   Int      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+
+  @@index([userId, uuid])
+}
+
+model Permission {
+  uuid      String   @unique @default(uuid())
+  id        Int      @id @default(autoincrement())
+  roleId    Int      @db.Int()
+  moduleId  Int      @db.Int()
+  create    Int      @db.TinyInt()
+  update    Int      @db.TinyInt()
+  read      Int      @db.TinyInt()
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  delete    Int      @db.TinyInt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id, roleId, moduleId])
+}
+
+model Email_Template {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  subject   String   @db.Text
+  content   String   @db.Text
+  status    Int      @default(1) @db.TinyInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model oneTimeAddon {
+  id                                                     Int             @id @default(autoincrement())
+  addOnName                                              String          @db.VarChar(255)
+  selectedAddon_option                                   String          @db.VarChar(255)
+  invoiceId                                              String          @db.VarChar(255)
+  stripeSubscriptionId                                   String          @db.VarChar(255)
+  createdAt                                              DateTime        @db.DateTime(0)
+  updatedAt                                              DateTime        @db.DateTime(0)
+  subscriptions_subscriptions_oneTimeAddonTooneTimeAddon subscriptions[] @relation("subscriptions_oneTimeAddonTooneTimeAddon")
+}
+
+model planChangeHistory {
+  id                                                               Int             @id @default(autoincrement())
+  previousPlanId                                                   String          @db.VarChar(255)
+  initialPlanName                                                  String          @db.VarChar(255)
+  planChangeTimestamp                                              DateTime        @db.DateTime(0)
+  stripeSubscriptionId                                             String          @db.VarChar(255)
+  isAddon                                                          String          @db.VarChar(255)
+  createdAt                                                        DateTime        @db.DateTime(0)
+  updatedAt                                                        DateTime        @db.DateTime(0)
+  subscriptions_subscriptions_planChangeHistoryToplanChangeHistory subscriptions[] @relation("subscriptions_planChangeHistoryToplanChangeHistory")
+}
+
+model refund {
+  id                                       Int            @id @default(autoincrement())
+  userId                                   String         @db.VarChar(255)
+  refundStatus                             String         @db.VarChar(255)
+  refundId                                 String         @db.VarChar(255)
+  refundAmount                             String         @db.VarChar(255)
+  created                                  DateTime       @db.DateTime(0)
+  createdAt                                DateTime       @db.DateTime(0)
+  updatedAt                                DateTime       @db.DateTime(0)
+  transactions_transactions_refundTorefund transactions[] @relation("transactions_refundTorefund")
+}
+
+model subscriptions {
+  id                                                                   Int                @id @default(autoincrement())
+  userId                                                               Int
+  planId                                                               Int
+  planName                                                             String             @db.VarChar(255)
+  planChangeHistory                                                    Int?
+  startDate                                                            DateTime           @db.DateTime(0)
+  currentEndDate                                                       DateTime           @db.DateTime(0)
+  status                                                               String             @db.VarChar(255)
+  cancelAt                                                             String?            @db.VarChar(255)
+  canceledAt                                                           String?            @db.VarChar(255)
+  stripeCustomerId                                                     String             @db.VarChar(255)
+  stripeSubscriptionId                                                 String             @unique(map: "stripeSubscriptionId") @db.VarChar(255)
+  oneTimeAddon                                                         Int?
+  createdAt                                                            DateTime           @db.DateTime(0)
+  updatedAt                                                            DateTime           @db.DateTime(0)
+  user                                                                 User?              @relation(fields: [userId], references: [id])
+  plan                                                                 Plan?              @relation(fields: [planId], references: [id])
+  planChangeHistory_subscriptions_planChangeHistoryToplanChangeHistory planChangeHistory? @relation("subscriptions_planChangeHistoryToplanChangeHistory", fields: [planChangeHistory], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "subscriptions_ibfk_1")
+  oneTimeAddon_subscriptions_oneTimeAddonTooneTimeAddon                oneTimeAddon?      @relation("subscriptions_oneTimeAddonTooneTimeAddon", fields: [oneTimeAddon], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "subscriptions_ibfk_2")
+  transactions                                                         transactions[]
+}
+
+model transactions {
+  id                                 Int            @id @default(autoincrement())
+  invoiceId                          String         @unique(map: "invoiceId") @db.VarChar(255)
+  planId                             Int?
+  status                             String         @db.VarChar(255)
+  stripeSubscriptionId               String?        @db.VarChar(255)
+  stripeProductId                    String         @db.VarChar(255)
+  startDate                          DateTime       @db.DateTime(0)
+  currentEndDate                     String?        @db.VarChar(255)
+  invoiceCreatedAt                   DateTime       @db.DateTime(0)
+  invoiceFinalizedAt                 String?        @db.VarChar(255)
+  currency                           String         @db.VarChar(255)
+  amountToBePaid                     Float          @db.Double()
+  stripePaymentMethodId              String         @db.VarChar(255)
+  userId                             String         @db.VarChar(255)
+  addonId                            String?        @db.VarChar(255)
+  isSubscribed                       String         @db.VarChar(255)
+  refund                             Int?
+  createdAt                          DateTime       @db.DateTime(0)
+  updatedAt                          DateTime       @db.DateTime(0)
+  plan                               Plan?          @relation(fields: [planId], references: [id])
+  subscripton                        subscriptions? @relation(fields: [stripeSubscriptionId], references: [stripeSubscriptionId])
+  refund_transactions_refundTorefund refund?        @relation("transactions_refundTorefund", fields: [refund], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_ibfk_1")
+
+  @@index([refund], map: "refund")
+}
+
+model Fun_Facts {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  question  String   @db.Text
+  answer    String   @db.Text
+  optionA   String   @db.Text
+  optionB   String   @db.Text
+  optionC   String   @db.Text
+  optionD   String   @db.Text
+  status    Int      @default(1) @db.TinyInt() //1-active 2- not active
+  isDeleted Int      @default(1) @db.TinyInt() //1-not deleted 2- deleted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
