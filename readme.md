@@ -52,13 +52,16 @@ Ensure you have the following installed:
 
    ```
 
+### Environment Setup
+
 4. **Add required env variables**
 
    ```bash
    DATABASE_URL=`your-database-connection-url`
    PORT=3000
-
    ```
+
+### Database Setup with Prisma
 
 5. **Database Setup with Prisma**
 
@@ -71,8 +74,9 @@ Ensure you have the following installed:
 
    3. generate prisma clients/types
    npx prisma generate
-
    ```
+
+### Scripts
 
 6. **Scripts**
 
@@ -95,3 +99,33 @@ Ensure you have the following installed:
    6. uat: Sets up the UAT environment by copying .env.uat to .env and starts the development server.
    npm run uat
    ```
+
+### Built With
+
+7. **Built With**
+
+   This project uses the following technologies:
+
+- **[Node.js](https://nodejs.org/)**: A JavaScript runtime built on Chrome's V8 JavaScript engine, used for building scalable server-side applications.
+- **[Express](https://expressjs.com/)**: A minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.
+- **[TypeScript](https://www.typescriptlang.org/)**: A typed superset of JavaScript that compiles to plain JavaScript, adding static types to the language.
+- **[Prisma](https://www.prisma.io/)**: An open-source ORM (Object-Relational Mapping) tool that simplifies database access and management, providing a type-safe query builder for modern applications.
+- **[BullMQ](https://docs.bullmq.io/)**: A powerful, modern queue library for Node.js, built on top of Redis, for handling background jobs, queues, and real-time data processing.
+- **[Redis](https://redis.io/)**: An open-source, in-memory data structure store that is often used as a database, cache, and message broker.
+- **Other packages**: Additional dependencies and development tools as specified in the `package.json` file, such as Prettier for code formatting, TSLint for code linting, and `ts-node-dev` for running TypeScript files with automatic restarts.
+
+These technologies are chosen to create a scalable, efficient, and maintainable server-side application that can handle a variety of real-world use cases, from web services to job processing.
+
+### License
+
+8. **LICENSE**
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+### Explanation of the Additions:
+
+- **Database Setup with Prisma**: This section includes all necessary commands to set up Prisma, run migrations, and deploy them.
+- **Environment Setup**: Describes how to manage different environment configurations using `.env` files.
+- **Prerequisites** and **Installation**: Detail all necessary installations and steps to get the project running locally.
+
+Feel free to customize this further based on your project needs!
