@@ -22,7 +22,7 @@ Follow these instructions to set up the project on your local machine for develo
 
 Ensure you have the following installed:
 
-- [Node.js](https://nodejs.org/) (version 14 or higher recommended)
+- [Node.js](https://nodejs.org/) (version 18 or higher recommended)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [TypeScript](https://www.typescriptlang.org/)
 - [ts-node-dev](https://github.com/wclr/ts-node-dev)
