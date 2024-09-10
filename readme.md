@@ -33,8 +33,8 @@ Ensure you have the following installed:
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository-url>
-   cd <project-directory>
+   git clone https://github.com/karansamra/nodets-prisma-background-jobs-boilerplate.git
+   cd nodets-prisma-background-jobs-boilerplate
 
    ```
 
@@ -69,7 +69,7 @@ Ensure you have the following installed:
    2. deploy migrations
    npx prisma migrate deploy
 
-   3. genaret prisma clients/types
+   3. generate prisma clients/types
    npx prisma generate
 
    ```
